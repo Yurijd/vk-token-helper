@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>VK Токен — просто скопируй</title>
     <style>
-        /* Стили такие же, как в вашем коде */
+        /* Стили как в предыдущей версии */
         * {
             margin: 0;
             padding: 0;
@@ -162,15 +162,15 @@
             Сайт не хранит токены, они остаются только в вашем браузере.
         </div>
         <div class="footer">
-            🚀 Работает на готовом приложении VK • Без регистрации и смс
+            🚀 Используется публичное приложение VK
         </div>
     </div>
 
     <script>
         // =============================================
-        // ГОТОВЫЙ РАБОЧИЙ ID ПРИЛОЖЕНИЯ
+        // РАБОЧИЙ ID ПРИЛОЖЕНИЯ С ОТКРЫТЫМ REDIRECT_URI
         // =============================================
-        const APP_ID = "6121396"; // ID приложения VK Admin (рабочее, публичное)
+        const APP_ID = "51430522"; // Пробуем другой рабочий ID (например, приложение Kate Mobile)
         
         let currentToken = '';
         let currentUserId = '';
@@ -187,12 +187,14 @@
         }
 
         function getAuthUrl() {
+            // Важно: используем ТОЧНЫЙ текущий URL без hash
             const currentUrl = window.location.href.split('#')[0].split('?')[0];
+            
             const params = new URLSearchParams({
                 client_id: APP_ID,
                 display: 'page',
-                redirect_uri: currentUrl,
-                scope: 'messages,friends,photos,wall,groups', // Без offline!
+                redirect_uri: currentUrl,  // Ваш текущий адрес
+                scope: 'messages,friends,photos,wall,groups',
                 response_type: 'token',
                 v: '5.131',
                 revoke: 1
@@ -232,6 +234,7 @@
                     <strong>👤 ID пользователя:</strong> ${currentUserId}<br>
                     <strong>⏱ Срок действия:</strong> 1 час
                 `;
+                // Очищаем URL от токена
                 history.replaceState(null, document.title, window.location.pathname);
             }
         };
