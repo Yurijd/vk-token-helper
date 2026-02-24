@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VK Token Получатель</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #4a76a8, #6c8cba);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 550px;
+            width: 100%;
+            padding: 35px;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h1 span {
+            background: #4a76a8;
+            color: white;
+            font-size: 14px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: normal;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .step-box {
+            background: #f8f9ff;
+            border-left: 4px solid #4a76a8;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 25px 0;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .step-number {
+            width: 30px;
+            height: 30px;
+            background: #4a76a8;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .step-text {
+            color: #555;
+            font-size: 15px;
+        }
+
+        .vk-button {
+            display: inline-block;
+            background: #4a76a8;
+            color: white;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 500;
+            margin: 20px 0;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+        }
+
+        .vk-button:hover {
+            background: #3a5f87;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(74, 118, 168, 0.3);
+        }
+
+        .token-container {
+            background: #f5f5f5;
+            border: 2px dashed #4a76a8;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 25px 0;
+            display: none;
+        }
+
+        .token-label {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        .token-box {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            max-height: 150px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+
+        .copy-button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.3s;
+        }
+
+        .copy-button:hover {
+            background: #218838;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 25px 0;
+            font-size: 14px;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .warning-icon {
+            font-size: 20px;
+        }
+
+        .info-text {
+            color: #777;
+            font-size: 13px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .copied-message {
+            color: #28a745;
+            margin-left: 10px;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4a76a8;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .user-info {
+            background: #e8f0fe;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+
+        .badge {
+            background: #4a76a8;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            display: inline-block;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>
+            🔑 VK Token Helper
+            <span>GitHub</span>
+        </h1>
+        <p class="subtitle">Простой и безопасный способ получить токен доступа VK API прямо в браузере</p>
+
+        <!-- Шаг 1: Настройки приложения -->
+        <div class="step-box">
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-text">
+                    <strong>Введите ID вашего приложения</strong><br>
+                    <small style="color: #666;">(App ID из настроек VK)</small>
+                </div>
+            </div>
+            <input type="text" id="appId" placeholder="Например: 1234567" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; margin: 10px 0;">
+            
+            <div style="margin: 15px 0;">
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                    <input type="checkbox" id="offlineScope" checked>
+                    <span>🔋 Бессрочный токен (offline)</span>
+                </label>
+                <small style="color: #666; margin-left: 25px;">Токен не будет истекать</small>
+            </div>
+
+            <div style="margin: 15px 0;">
+                <label style="display: block; margin-bottom: 8px;">📋 Права доступа (scope):</label>
+                <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                    <label><input type="checkbox" id="scopeMessages" checked> Сообщения</label>
+                    <label><input type="checkbox" id="scopeFriends"> Друзья</label>
+                    <label><input type="checkbox" id="scopePhotos"> Фото</label>
+                    <label><input type="checkbox" id="scopeWall"> Стена</label>
+                    <label><input type="checkbox" id="scopeGroups"> Группы</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Шаг 2: Кнопка авторизации -->
+        <div class="step-box">
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-text">
+                    <strong>Нажмите кнопку для авторизации</strong><br>
+                    <small>Будет открыто окно ВКонтакте</small>
+                </div>
+            </div>
+            
+            <button class="vk-button" id="authButton" onclick="startAuth()">
+                🔵 Войти через ВКонтакте
+            </button>
+        </div>
+
+        <!-- Индикатор загрузки -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Ожидание авторизации...</p>
+        </div>
+
+        <!-- Результат (появляется после авторизации) -->
+        <div class="token-container" id="resultBlock">
+            <div class="token-label">✅ Токен успешно получен!</div>
+            
+            <div class="user-info" id="userInfo"></div>
+            
+            <div class="token-box" id="tokenDisplay"></div>
+            
+            <button class="copy-button" onclick="copyToken()">
+                📋 Скопировать токен
+                <span class="copied-message" id="copiedMsg">Скопировано!</span>
+            </button>
+        </div>
+
+        <!-- Важное предупреждение -->
+        <div class="warning">
+            <span class="warning-icon">⚠️</span>
+            <div>
+                <strong>Никому не передавайте токен!</strong><br>
+                Токен даёт полный доступ к вашему аккаунту. Мы не храним и не отправляем его никуда — он остаётся только в вашем браузере.
+            </div>
+        </div>
+
+        <!-- Информация -->
+        <div class="info-text">
+            🔧 <strong>Как это работает:</strong><br>
+            1. Введите ID своего VK приложения<br>
+            2. Нажмите кнопку и разрешите доступ<br>
+            3. Скопируйте токен из этого окна<br><br>
+            📌 <strong>GitHub Pages</strong> — код выполняется в вашем браузере, никаких данных не отправляется на сервер
+        </div>
+    </div>
+
+    <script>
+        // Текущий токен
+        let currentToken = '';
+        let currentUserId = '';
+
+        // Функция для получения параметров из hash (то, что после #)
+        function getParamsFromHash() {
+            const hash = window.location.hash.substring(1);
+            if (!hash) return null;
+            
+            const params = {};
+            hash.split('&').forEach(pair => {
+                const [key, value] = pair.split('=');
+                if (key && value) {
+                    params[key] = decodeURIComponent(value);
+                }
+            });
+            return params;
+        }
+
+        // Функция для получения параметров из query (то, что после ?)
+        function getParamsFromQuery() {
+            const query = window.location.search.substring(1);
+            if (!query) return null;
+            
+            const params = {};
+            query.split('&').forEach(pair => {
+                const [key, value] = pair.split('=');
+                if (key && value) {
+                    params[key] = decodeURIComponent(value);
+                }
+            });
+            return params;
+        }
+
+        // Формирование ссылки для авторизации
+        function getAuthUrl() {
+            const appId = document.getElementById('appId').value.trim();
+            
+            if (!appId) {
+                alert('Пожалуйста, введите ID приложения!');
+                return null;
+            }
+
+            // Собираем права доступа
+            let scope = [];
+            if (document.getElementById('offlineScope').checked) scope.push('offline');
+            if (document.getElementById('scopeMessages').checked) scope.push('messages');
+            if (document.getElementById('scopeFriends').checked) scope.push('friends');
+            if (document.getElementById('scopePhotos').checked) scope.push('photos');
+            if (document.getElementById('scopeWall').checked) scope.push('wall');
+            if (document.getElementById('scopeGroups').checked) scope.push('groups');
+            
+            // Базовая ссылка
+            const baseUrl = 'https://oauth.vk.com/authorize';
+            const params = {
+                client_id: appId,
+                display: 'page',
+                redirect_uri: window.location.href.split('#')[0].split('?')[0], // Текущий URL без hash и query
+                scope: scope.join(','),
+                response_type: 'token',
+                v: '5.131',
+                revoke: 1 // Запрашивать разрешения заново
+            };
+
+            const urlParams = new URLSearchParams(params);
+            return baseUrl + '?' + urlParams.toString();
+        }
+
+        // Начать авторизацию
+        function startAuth() {
+            const url = getAuthUrl();
+            if (url) {
+                document.getElementById('loading').style.display = 'block';
+                window.location.href = url;
+            }
+        }
+
+        // Копирование токена
+        function copyToken() {
+            if (!currentToken) return;
+            
+            // Используем современный Clipboard API
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(currentToken).then(() => {
+                    showCopiedMessage();
+                }).catch(() => {
+                    fallbackCopy();
+                });
+            } else {
+                fallbackCopy();
+            }
+        }
+
+        function fallbackCopy() {
+            const textarea = document.createElement('textarea');
+            textarea.value = currentToken;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            showCopiedMessage();
+        }
+
+        function showCopiedMessage() {
+            const msg = document.getElementById('copiedMsg');
+            msg.style.display = 'inline';
+            setTimeout(() => {
+                msg.style.display = 'none';
+            }, 2000);
+        }
+
+        // Проверка при загрузке страницы
+        window.onload = function() {
+            // Скрываем загрузку
+            document.getElementById('loading').style.display = 'none';
+            
+            // Проверяем hash (успешная авторизация)
+            const hashParams = getParamsFromHash();
+            
+            if (hashParams && hashParams.access_token) {
+                // Токен получен!
+                currentToken = hashParams.access_token;
+                currentUserId = hashParams.user_id || 'неизвестно';
+                const expiresIn = hashParams.expires_in || 0;
+                
+                // Показываем блок с результатом
+                document.getElementById('resultBlock').style.display = 'block';
+                document.getElementById('tokenDisplay').textContent = currentToken;
+                
+                // Информация о пользователе
+                let expiresText = '';
+                if (expiresIn > 0) {
+                    const hours = Math.floor(expiresIn / 3600);
+                    expiresText = `${hours} ч (${expiresIn} сек)`;
+                } else {
+                    expiresText = 'бессрочный';
+                }
+                
+                document.getElementById('userInfo').innerHTML = `
+                    <strong>👤 ID пользователя:</strong> ${currentUserId}<br>
+                    <strong>⏱ Срок действия:</strong> ${expiresText}
+                `;
+                
+                // Очищаем hash из URL (чтобы токен не светился)
+                history.replaceState(null, document.title, window.location.pathname);
+            } 
+            // Проверяем ошибки
+            else {
+                const queryParams = getParamsFromQuery();
+                if (queryParams && queryParams.error) {
+                    alert('Ошибка авторизации: ' + (queryParams.error_description || queryParams.error));
+                }
+            }
+        };
+
+        // Сохраняем ID приложения в localStorage
+        document.getElementById('appId').addEventListener('input', function(e) {
+            if (e.target.value) {
+                localStorage.setItem('vk_app_id', e.target.value);
+            }
+        });
+
+        // Загружаем сохранённый ID приложения
+        const savedAppId = localStorage.getItem('vk_app_id');
+        if (savedAppId) {
+            document.getElementById('appId').value = savedAppId;
+        }
+    </script>
+</body>
+</html>
