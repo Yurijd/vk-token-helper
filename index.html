@@ -2,14 +2,15 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VK Токен — просто скопируй</title>
     <style>
-        /* Стили остаются без изменений */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #4a76a8, #2c3e50);
@@ -19,185 +20,277 @@
             justify-content: center;
             padding: 15px;
         }
+
         .card {
             background: white;
             border-radius: 24px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             max-width: 600px;
             width: 100%;
-            padding: 30px;
+            padding: 40px;
         }
+
         h1 {
             color: #333;
-            font-size: 28px;
+            font-size: 32px;
             margin-bottom: 10px;
+            text-align: center;
         }
+
         .subtitle {
             color: #666;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
             font-size: 16px;
+            text-align: center;
         }
+
         .vk-button {
             background: #4a76a8;
             color: white;
             border: none;
-            padding: 16px 30px;
-            border-radius: 12px;
+            padding: 18px 30px;
+            border-radius: 14px;
             font-size: 18px;
             font-weight: 600;
             cursor: pointer;
             width: 100%;
             transition: all 0.3s;
-            margin: 15px 0 25px;
+            margin: 20px 0;
+            box-shadow: 0 4px 10px rgba(74, 118, 168, 0.3);
         }
+
         .vk-button:hover {
             background: #3a5f87;
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(74, 118, 168, 0.4);
+            box-shadow: 0 6px 15px rgba(74, 118, 168, 0.4);
         }
+
+        .vk-button:active {
+            transform: translateY(0);
+        }
+
         .token-result {
-            background: #f0f2f5;
-            border-radius: 16px;
-            padding: 20px;
-            margin-top: 20px;
+            background: #f8f9fa;
+            border-radius: 20px;
+            padding: 25px;
+            margin: 25px 0;
             display: none;
+            border: 2px solid #4a76a8;
         }
+
+        .token-label {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .token-label::before {
+            content: "✅";
+            font-size: 18px;
+        }
+
         .token-box {
             background: white;
-            padding: 18px;
+            padding: 20px;
             border-radius: 12px;
             word-break: break-all;
             font-family: 'Courier New', monospace;
             font-size: 14px;
-            border: 1px solid #ddd;
-            margin-bottom: 15px;
-            max-height: 150px;
+            border: 1px solid #e0e0e0;
+            margin: 15px 0;
+            max-height: 180px;
             overflow-y: auto;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
         }
+
         .user-info {
-            background: white;
+            background: #e8f0fe;
             padding: 15px;
             border-radius: 12px;
             margin: 15px 0;
             font-size: 15px;
             border-left: 4px solid #4a76a8;
         }
+
         .copy-button {
             background: #28a745;
             color: white;
             border: none;
-            padding: 14px 25px;
-            border-radius: 10px;
+            padding: 15px 25px;
+            border-radius: 12px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             width: 100%;
             transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
+
         .copy-button:hover {
             background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
         }
+
+        .copy-button.copied {
+            background: #34ce57;
+        }
+
         .warning {
             background: #fff3cd;
             border: 1px solid #ffeeba;
             color: #856404;
-            padding: 16px;
-            border-radius: 12px;
+            padding: 18px;
+            border-radius: 14px;
             margin: 25px 0 0;
             font-size: 14px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
         }
+
+        .warning-icon {
+            font-size: 20px;
+        }
+
         .loading {
             display: none;
             text-align: center;
             margin: 30px 0;
         }
+
         .spinner {
             border: 4px solid #f3f3f3;
             border-top: 4px solid #4a76a8;
             border-radius: 50%;
-            width: 45px;
-            height: 45px;
+            width: 50px;
+            height: 50px;
             animation: spin 1s linear infinite;
             margin: 0 auto 15px;
         }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
         .footer {
             text-align: center;
-            margin-top: 25px;
+            margin-top: 30px;
             color: #888;
             font-size: 13px;
+        }
+
+        .success-message {
+            text-align: center;
+            color: #4a76a8;
+            margin: 20px 0;
+            padding: 15px;
+            background: #e8f0fe;
+            border-radius: 12px;
+            font-size: 15px;
         }
     </style>
 </head>
 <body>
     <div class="card">
         <h1>🔑 VK Токен Хелпер</h1>
-        <p class="subtitle">Нажми кнопку — токен появится здесь</p>
+        <p class="subtitle">Нажми кнопку — разреши доступ — скопируй токен</p>
 
+        <!-- Кнопка авторизации -->
         <button class="vk-button" id="authBtn" onclick="startAuth()">
             🔵 Получить токен ВКонтакте
         </button>
 
+        <!-- Индикатор загрузки -->
         <div class="loading" id="loading">
             <div class="spinner"></div>
-            <p>Перенаправление на страницу авторизации...</p>
+            <p>Перенаправление на страницу авторизации VK...</p>
         </div>
 
+        <!-- Блок с результатом -->
         <div class="token-result" id="resultBlock">
-            <div class="user-info" id="userInfo"></div>
+            <div class="token-label">Токен успешно получен!</div>
+            
+            <div class="user-info" id="userInfo">
+                Загрузка информации...
+            </div>
+            
             <div class="token-box" id="tokenDisplay"></div>
+            
             <button class="copy-button" id="copyBtn" onclick="copyToken()">
                 📋 Скопировать токен
             </button>
+            
+            <div class="success-message" id="copySuccess" style="display: none;">
+                ✅ Токен скопирован в буфер обмена!
+            </div>
         </div>
 
+        <!-- Предупреждение о безопасности -->
         <div class="warning">
-            ⚠️ Токен — ключ доступа к аккаунту. Никому не передавайте его.
-            Сайт не хранит токены, они остаются только в вашем браузере.
+            <span class="warning-icon">⚠️</span>
+            <div>
+                <strong>Никому не передавайте токен!</strong><br>
+                Токен — это ключ доступа к вашему аккаунту. Этот сайт не хранит токены, они остаются только в вашем браузере.
+            </div>
         </div>
+
         <div class="footer">
-            🚀 Пробуем приложение AMR Voice (ID: 2890980)
+            Работает на собственном приложении • Безопасно и просто
         </div>
     </div>
 
     <script>
         // =============================================
-        // НОВЫЙ ID ПРИЛОЖЕНИЯ (AMR Voice)
+        // ВАШ СОБСТВЕННЫЙ ID ПРИЛОЖЕНИЯ
         // =============================================
-        const APP_ID = "2890980"; // Пробуем AMR Voice
+        const APP_ID = "54462721"; // Ваш новый ID!
         
         let currentToken = '';
         let currentUserId = '';
 
+        // Функция извлечения параметров из hash (там лежит токен)
         function getParamsFromHash() {
             const hash = window.location.hash.substring(1);
             if (!hash) return null;
+            
             const params = {};
             hash.split('&').forEach(pair => {
                 const [key, value] = pair.split('=');
-                if (key && value) params[key] = decodeURIComponent(value);
+                if (key && value) {
+                    params[key] = decodeURIComponent(value);
+                }
             });
             return params;
         }
 
+        // Функция формирования ссылки для авторизации
         function getAuthUrl() {
+            // Текущий URL без hash и query параметров
             const currentUrl = window.location.href.split('#')[0].split('?')[0];
             
             const params = new URLSearchParams({
                 client_id: APP_ID,
                 display: 'page',
-                redirect_uri: currentUrl,
-                scope: 'messages,friends,photos,wall,groups',
+                redirect_uri: currentUrl,  // Ваш адрес на GitHub
+                scope: 'messages,friends,photos,wall,groups',  // Нужные права
                 response_type: 'token',
                 v: '5.131',
-                revoke: 1
+                revoke: 1  // Запрашивать разрешения заново
             });
+
             return 'https://oauth.vk.com/authorize?' + params.toString();
         }
 
+        // Начать авторизацию
         window.startAuth = function() {
             const url = getAuthUrl();
             document.getElementById('loading').style.display = 'block';
@@ -205,32 +298,93 @@
             window.location.href = url;
         };
 
+        // Копирование токена
         window.copyToken = function() {
             if (!currentToken) return;
-            navigator.clipboard.writeText(currentToken).then(() => {
-                const btn = document.getElementById('copyBtn');
-                btn.innerHTML = '✅ Скопировано!';
-                setTimeout(() => btn.innerHTML = '📋 Скопировать токен', 2000);
-            });
+            
+            const copyBtn = document.getElementById('copyBtn');
+            const successMsg = document.getElementById('copySuccess');
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(currentToken).then(() => {
+                    copyBtn.innerHTML = '✅ Скопировано!';
+                    copyBtn.classList.add('copied');
+                    successMsg.style.display = 'block';
+                    setTimeout(() => {
+                        copyBtn.innerHTML = '📋 Скопировать токен';
+                        copyBtn.classList.remove('copied');
+                        successMsg.style.display = 'none';
+                    }, 2000);
+                });
+            } else {
+                // Для старых браузеров
+                const textarea = document.createElement('textarea');
+                textarea.value = currentToken;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                
+                copyBtn.innerHTML = '✅ Скопировано!';
+                copyBtn.classList.add('copied');
+                successMsg.style.display = 'block';
+                setTimeout(() => {
+                    copyBtn.innerHTML = '📋 Скопировать токен';
+                    copyBtn.classList.remove('copied');
+                    successMsg.style.display = 'none';
+                }, 2000);
+            }
         };
 
+        // Основная логика при загрузке страницы
         window.onload = function() {
+            // Скрываем индикатор загрузки
             document.getElementById('loading').style.display = 'none';
             document.getElementById('authBtn').disabled = false;
             
+            // Получаем параметры из hash
             const hashParams = getParamsFromHash();
             
             if (hashParams && hashParams.access_token) {
+                // ✅ ТОКЕН ПОЛУЧЕН!
                 currentToken = hashParams.access_token;
                 currentUserId = hashParams.user_id || 'неизвестно';
+                const expiresIn = hashParams.expires_in || 0;
                 
+                // Форматируем время действия
+                let expiresText = '';
+                if (expiresIn > 0) {
+                    const hours = Math.floor(expiresIn / 3600);
+                    const minutes = Math.floor((expiresIn % 3600) / 60);
+                    expiresText = `${hours} ч ${minutes} мин (${expiresIn} сек)`;
+                } else {
+                    expiresText = '1 час (стандартный срок)';
+                }
+                
+                // Показываем блок с результатом
                 document.getElementById('resultBlock').style.display = 'block';
                 document.getElementById('tokenDisplay').textContent = currentToken;
                 document.getElementById('userInfo').innerHTML = `
                     <strong>👤 ID пользователя:</strong> ${currentUserId}<br>
-                    <strong>⏱ Срок действия:</strong> 1 час
+                    <strong>⏱ Срок действия:</strong> ${expiresText}<br>
+                    <strong>📱 Приложение:</strong> Мой Токен Хелпер (ID: ${APP_ID})
                 `;
+                
+                // Очищаем hash из адресной строки (чтобы токен не светился)
                 history.replaceState(null, document.title, window.location.pathname);
+                
+                // Прокручиваем к результату
+                document.getElementById('resultBlock').scrollIntoView({ behavior: 'smooth' });
+            } 
+            else {
+                // Проверяем ошибки в query-строке
+                const queryParams = new URLSearchParams(window.location.search);
+                const error = queryParams.get('error');
+                const errorDescription = queryParams.get('error_description');
+                
+                if (error) {
+                    alert('❌ Ошибка авторизации: ' + (errorDescription || error));
+                }
             }
         };
     </script>
