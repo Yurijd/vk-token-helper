@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VK Токен — простая инструкция</title>
+    <title>VK Токен — просто скопируй</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #4a76a8, #2c3e50);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -25,7 +25,7 @@
             background: white;
             border-radius: 24px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 650px;
+            max-width: 600px;
             width: 100%;
             padding: 40px;
         }
@@ -33,7 +33,7 @@
         h1 {
             color: #333;
             font-size: 32px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             text-align: center;
         }
 
@@ -42,360 +42,208 @@
             margin-bottom: 30px;
             font-size: 16px;
             text-align: center;
-            line-height: 1.5;
         }
 
         .vk-button {
             background: #4a76a8;
             color: white;
             border: none;
-            padding: 20px 30px;
-            border-radius: 16px;
-            font-size: 20px;
+            padding: 18px 30px;
+            border-radius: 14px;
+            font-size: 18px;
             font-weight: 600;
             cursor: pointer;
             width: 100%;
             transition: all 0.3s;
             margin: 20px 0;
-            box-shadow: 0 4px 15px rgba(74, 118, 168, 0.4);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+            box-shadow: 0 4px 10px rgba(74, 118, 168, 0.3);
         }
 
         .vk-button:hover {
             background: #3a5f87;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(74, 118, 168, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(74, 118, 168, 0.4);
         }
 
-        .vk-button:active {
-            transform: translateY(0);
-        }
-
-        .instruction-box {
-            background: #f8f9ff;
+        .token-result {
+            background: #f8f9fa;
             border-radius: 20px;
             padding: 25px;
             margin: 25px 0;
+            display: none;
             border: 2px solid #4a76a8;
         }
 
-        .instruction-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .token-box {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            border: 1px solid #e0e0e0;
+            margin: 15px 0;
+            max-height: 180px;
+            overflow-y: auto;
         }
 
-        .step {
-            display: flex;
-            gap: 15px;
-            margin: 20px 0;
-            align-items: flex-start;
-        }
-
-        .step-number {
-            background: #4a76a8;
-            color: white;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 18px;
-            flex-shrink: 0;
-        }
-
-        .step-content {
-            flex: 1;
-        }
-
-        .step-content strong {
-            color: #333;
-            display: block;
-            margin-bottom: 5px;
-            font-size: 16px;
-        }
-
-        .step-content p {
-            color: #666;
-            font-size: 15px;
-            line-height: 1.5;
-        }
-
-        .highlight {
+        .user-info {
             background: #e8f0fe;
             padding: 15px;
             border-radius: 12px;
             margin: 15px 0;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            word-break: break-all;
-            border-left: 4px solid #4a76a8;
-        }
-
-        .warning {
-            background: #fff3cd;
-            border: 1px solid #ffeeba;
-            color: #856404;
-            padding: 20px;
-            border-radius: 16px;
-            margin: 25px 0;
             font-size: 15px;
-            display: flex;
-            gap: 12px;
-            align-items: flex-start;
-        }
-
-        .warning-icon {
-            font-size: 24px;
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 25px;
-            color: #888;
-            font-size: 14px;
-        }
-
-        .token-box {
-            background: #f5f5f5;
-            padding: 15px;
-            border-radius: 12px;
-            margin: 15px 0;
-            border: 2px dashed #4a76a8;
-            display: none;
-        }
-
-        .token-box.visible {
-            display: block;
-        }
-
-        .token-label {
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: #333;
-        }
-
-        .token-display {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            word-break: break-all;
-            font-family: 'Courier New', monospace;
-            border: 1px solid #ddd;
+            border-left: 4px solid #4a76a8;
         }
 
         .copy-button {
             background: #28a745;
             color: white;
             border: none;
-            padding: 12px 20px;
-            border-radius: 10px;
+            padding: 15px 25px;
+            border-radius: 12px;
             font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
-            margin-top: 10px;
             width: 100%;
-            transition: background 0.3s;
+            transition: all 0.3s;
         }
 
         .copy-button:hover {
             background: #218838;
         }
 
-        .note {
-            background: #e7f3ff;
-            padding: 15px;
-            border-radius: 12px;
-            margin: 20px 0;
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 18px;
+            border-radius: 14px;
+            margin: 25px 0 0;
             font-size: 14px;
-            color: #004085;
-            border-left: 4px solid #4a76a8;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4a76a8;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
     <div class="card">
         <h1>🔑 VK Токен Хелпер</h1>
-        <p class="subtitle">Получите токен за 3 простых шага — даже если никогда раньше этого не делали</p>
+        <p class="subtitle">Нажми кнопку — разреши доступ — скопируй токен</p>
 
-        <!-- Кнопка перехода на vkhost -->
-        <a href="https://vkhost.github.io" target="_blank" style="text-decoration: none;">
-            <button class="vk-button" onclick="showInstructions()">
-                <span>🚀</span> Перейти на vkhost.github.io
-                <span>→</span>
+        <button class="vk-button" id="authBtn" onclick="startAuth()">
+            🔵 Получить токен ВКонтакте
+        </button>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Перенаправление на страницу авторизации VK...</p>
+        </div>
+
+        <div class="token-result" id="resultBlock">
+            <div class="user-info" id="userInfo"></div>
+            <div class="token-box" id="tokenDisplay"></div>
+            <button class="copy-button" id="copyBtn" onclick="copyToken()">
+                📋 Скопировать токен
             </button>
-        </a>
-
-        <!-- Блок с инструкцией -->
-        <div class="instruction-box">
-            <div class="instruction-title">
-                <span>📋</span> Пошаговая инструкция
-            </div>
-
-            <!-- Шаг 1 -->
-            <div class="step">
-                <div class="step-number">1</div>
-                <div class="step-content">
-                    <strong>Выберите приложение</strong>
-                    <p>На сайте vkhost.github.io нажмите на любое приложение из списка. Например, <strong>"VK Admin"</strong> или <strong>"Kate Mobile"</strong>.</p>
-                </div>
-            </div>
-
-            <!-- Шаг 2 -->
-            <div class="step">
-                <div class="step-number">2</div>
-                <div class="step-content">
-                    <strong>Разрешите доступ</strong>
-                    <p>Нажмите <strong>"Разрешить"</strong> в окне ВКонтакте. Вы увидите страницу с надписью "Вы успешно авторизовались".</p>
-                </div>
-            </div>
-
-            <!-- Шаг 3 — самый важный -->
-            <div class="step">
-                <div class="step-number">3</div>
-                <div class="step-content">
-                    <strong>Скопируйте токен из адресной строки</strong>
-                    <p>В адресной строке браузера (самый верх) вы увидите длинный адрес. Найдите в нём <strong style="color: #4a76a8;">access_token=</strong> и скопируйте всё, что идёт после него до знака <strong>&</strong>.</p>
-                    
-                    <!-- Пример адресной строки -->
-                    <div class="highlight">
-                        https://oauth.vk.com/blank.html#<span style="background: #fff3cd; padding: 2px;">access_token=<strong style="color: #c00;">533bacf01e11f55b536a565b57531ad114461ae8736d6506a3</strong></span>&expires_in=86400&user_id=12345
-                    </div>
-                    <p style="font-size: 14px; color: #666; margin-top: 5px;">✅ <strong>Токен выделен красным</strong> — скопируйте только его</p>
-                </div>
-            </div>
         </div>
 
-        <!-- Блок для вставки и копирования токена -->
-        <div class="note">
-            💡 <strong>Скопировали токен?</strong> Вставьте его в поле ниже, чтобы сохранить и всегда иметь под рукой.
-        </div>
-
-        <div style="margin: 20px 0;">
-            <textarea id="tokenInput" placeholder="Вставьте токен сюда..." style="width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 12px; font-size: 14px; font-family: 'Courier New', monospace; min-height: 80px; resize: vertical;"></textarea>
-            
-            <button class="copy-button" onclick="saveAndCopy()">
-                📋 Сохранить и скопировать токен
-            </button>
-            
-            <p id="saveMessage" style="color: #28a745; margin-top: 10px; display: none; text-align: center;">
-                ✅ Токен сохранён в буфере обмена!
-            </p>
-        </div>
-
-        <!-- Блок с визуальным примером адресной строки -->
-        <div style="background: #2d2d2d; color: #fff; padding: 15px; border-radius: 12px; margin: 20px 0; font-family: 'Courier New', monospace; font-size: 13px; word-break: break-all;">
-            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                <span style="background: #4a76a8; padding: 3px 10px; border-radius: 12px; font-size: 12px;">Пример</span>
-                <span style="color: #aaa;">Адресная строка браузера</span>
-            </div>
-            https://oauth.vk.com/blank.html#access_token=<span style="color: #ff6b6b;">533bacf01e11f55b536a565b57531ad114461ae8736d6506a3</span>&expires_in=86400&user_id=12345
-        </div>
-
-        <!-- Предупреждение о безопасности -->
         <div class="warning">
-            <span class="warning-icon">⚠️</span>
+            <span>⚠️</span>
             <div>
-                <strong>Критически важно!</strong><br>
-                • Токен — это полный доступ к вашему аккаунту<br>
-                • Никогда не вставляйте его на подозрительных сайтах<br>
-                • Не отправляйте токен никому в сообщениях<br>
-                • Храните токен в надёжном месте
+                <strong>Никому не передавайте токен!</strong><br>
+                Токен — это ключ доступа к вашему аккаунту. Этот сайт не хранит токены.
             </div>
-        </div>
-
-        <!-- Дополнительные советы -->
-        <div style="background: #f0f2f5; padding: 20px; border-radius: 16px; margin: 20px 0;">
-            <h3 style="color: #333; margin-bottom: 15px; font-size: 18px;">🎯 Полезные советы</h3>
-            
-            <div style="display: grid; gap: 15px;">
-                <div style="display: flex; gap: 10px;">
-                    <span style="color: #4a76a8;">•</span>
-                    <span>Если не видите токен — обновите страницу на vkhost.github.io</span>
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <span style="color: #4a76a8;">•</span>
-                    <span>Токен действует около часа, потом нужно получить новый</span>
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <span style="color: #4a76a8;">•</span>
-                    <span>На компьютере удобнее копировать сочетанием клавиш Ctrl+C (Cmd+C на Mac)</span>
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <span style="color: #4a76a8;">•</span>
-                    <span>На телефоне: зажмите палец на адресной строке, выберите "Копировать"</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="footer">
-            Простой способ получить токен VK • Следуйте инструкции
         </div>
     </div>
 
     <script>
-        // Функция для сохранения и копирования токена
-        function saveAndCopy() {
-            const tokenInput = document.getElementById('tokenInput');
-            const token = tokenInput.value.trim();
-            const message = document.getElementById('saveMessage');
-            
-            if (!token) {
-                alert('Сначала вставьте токен в поле!');
-                return;
-            }
-            
-            // Копируем в буфер обмена
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(token).then(() => {
-                    message.style.display = 'block';
-                    setTimeout(() => {
-                        message.style.display = 'none';
-                    }, 2000);
-                });
-            } else {
-                // Для старых браузеров
-                const textarea = document.createElement('textarea');
-                textarea.value = token;
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-                
-                message.style.display = 'block';
-                setTimeout(() => {
-                    message.style.display = 'none';
-                }, 2000);
-            }
-            
-            // Сохраняем в localStorage
-            localStorage.setItem('vk_token', token);
-        }
+        // ВАШ СОБСТВЕННЫЙ ID ПРИЛОЖЕНИЯ
+        const APP_ID = "54462721";
         
-        // Загружаем сохранённый токен при загрузке страницы
+        let currentToken = '';
+
+        function getParamsFromHash() {
+            const hash = window.location.hash.substring(1);
+            if (!hash) return null;
+            const params = {};
+            hash.split('&').forEach(pair => {
+                const [key, value] = pair.split('=');
+                if (key && value) params[key] = decodeURIComponent(value);
+            });
+            return params;
+        }
+
+        function getAuthUrl() {
+            const currentUrl = window.location.href.split('#')[0].split('?')[0];
+            const params = new URLSearchParams({
+                client_id: APP_ID,
+                display: 'page',
+                redirect_uri: currentUrl,
+                scope: 'messages,friends,photos,wall,groups',
+                response_type: 'token',
+                v: '5.131'
+            });
+            return 'https://oauth.vk.com/authorize?' + params.toString();
+        }
+
+        window.startAuth = function() {
+            const url = getAuthUrl();
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('authBtn').disabled = true;
+            window.location.href = url;
+        };
+
+        window.copyToken = function() {
+            if (!currentToken) return;
+            navigator.clipboard.writeText(currentToken).then(() => {
+                const btn = document.getElementById('copyBtn');
+                btn.innerHTML = '✅ Скопировано!';
+                setTimeout(() => btn.innerHTML = '📋 Скопировать токен', 2000);
+            });
+        };
+
         window.onload = function() {
-            const savedToken = localStorage.getItem('vk_token');
-            if (savedToken) {
-                document.getElementById('tokenInput').value = savedToken;
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('authBtn').disabled = false;
+            
+            const hashParams = getParamsFromHash();
+            
+            if (hashParams && hashParams.access_token) {
+                currentToken = hashParams.access_token;
+                const userId = hashParams.user_id || 'неизвестно';
+                
+                document.getElementById('resultBlock').style.display = 'block';
+                document.getElementById('tokenDisplay').textContent = currentToken;
+                document.getElementById('userInfo').innerHTML = `
+                    <strong>👤 ID пользователя:</strong> ${userId}<br>
+                    <strong>⏱ Срок действия:</strong> 1 час
+                `;
+                history.replaceState(null, document.title, window.location.pathname);
             }
         };
-        
-        // Показываем подсказку при нажатии на кнопку перехода
-        function showInstructions() {
-            // Просто подсвечиваем инструкцию
-            document.querySelector('.instruction-box').style.backgroundColor = '#f0f5ff';
-            setTimeout(() => {
-                document.querySelector('.instruction-box').style.backgroundColor = '#f8f9ff';
-            }, 500);
-        }
     </script>
 </body>
 </html>
