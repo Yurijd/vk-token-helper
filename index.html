@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>VK Токен — просто скопируй</title>
     <style>
-        /* Стили как в предыдущей версии */
+        /* Стили остаются без изменений */
         * {
             margin: 0;
             padding: 0;
@@ -137,18 +137,15 @@
         <h1>🔑 VK Токен Хелпер</h1>
         <p class="subtitle">Нажми кнопку — токен появится здесь</p>
 
-        <!-- Кнопка авторизации -->
         <button class="vk-button" id="authBtn" onclick="startAuth()">
             🔵 Получить токен ВКонтакте
         </button>
 
-        <!-- Индикатор загрузки -->
         <div class="loading" id="loading">
             <div class="spinner"></div>
             <p>Перенаправление на страницу авторизации...</p>
         </div>
 
-        <!-- Блок с результатом -->
         <div class="token-result" id="resultBlock">
             <div class="user-info" id="userInfo"></div>
             <div class="token-box" id="tokenDisplay"></div>
@@ -162,15 +159,15 @@
             Сайт не хранит токены, они остаются только в вашем браузере.
         </div>
         <div class="footer">
-            🚀 Используется публичное приложение VK
+            🚀 Пробуем приложение VFeed (ID: 5769385)
         </div>
     </div>
 
     <script>
         // =============================================
-        // РАБОЧИЙ ID ПРИЛОЖЕНИЯ С ОТКРЫТЫМ REDIRECT_URI
+        // НОВЫЙ ID ПРИЛОЖЕНИЯ (VFeed)
         // =============================================
-        const APP_ID = "51430522"; // Пробуем другой рабочий ID (например, приложение Kate Mobile)
+        const APP_ID = "5769385"; // Пробуем VFeed
         
         let currentToken = '';
         let currentUserId = '';
@@ -187,13 +184,12 @@
         }
 
         function getAuthUrl() {
-            // Важно: используем ТОЧНЫЙ текущий URL без hash
             const currentUrl = window.location.href.split('#')[0].split('?')[0];
             
             const params = new URLSearchParams({
                 client_id: APP_ID,
                 display: 'page',
-                redirect_uri: currentUrl,  // Ваш текущий адрес
+                redirect_uri: currentUrl,
                 scope: 'messages,friends,photos,wall,groups',
                 response_type: 'token',
                 v: '5.131',
@@ -234,7 +230,6 @@
                     <strong>👤 ID пользователя:</strong> ${currentUserId}<br>
                     <strong>⏱ Срок действия:</strong> 1 час
                 `;
-                // Очищаем URL от токена
                 history.replaceState(null, document.title, window.location.pathname);
             }
         };
