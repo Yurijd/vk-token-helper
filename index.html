@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VK Токен — просто скопируй</title>
+    <title>VK Токен Хелпер</title>
     <style>
+        /* Стили можно оставить как в вашей последней версии */
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #4a76a8, #2c3e50);
@@ -22,196 +23,164 @@
             width: 100%;
             padding: 40px;
         }
-        h1 {
-            color: #333;
-            font-size: 32px;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-        .subtitle {
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 16px;
-            text-align: center;
-        }
+        h1 { color: #333; font-size: 32px; margin-bottom: 10px; text-align: center; }
+        .subtitle { color: #666; margin-bottom: 30px; font-size: 16px; text-align: center; }
         .vk-button {
-            background: #4a76a8;
-            color: white;
-            border: none;
-            padding: 18px 30px;
-            border-radius: 14px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            margin: 20px 0;
+            background: #4a76a8; color: white; border: none; padding: 18px 30px;
+            border-radius: 14px; font-size: 18px; font-weight: 600; cursor: pointer;
+            width: 100%; margin: 20px 0;
         }
-        .vk-button:hover {
-            background: #3a5f87;
-        }
+        .vk-button:hover { background: #3a5f87; }
+        .loading { display: none; text-align: center; margin: 30px 0; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #4a76a8; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 15px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .token-result {
-            background: #f8f9fa;
-            border-radius: 20px;
-            padding: 25px;
-            margin: 25px 0;
-            display: none;
-            border: 2px solid #4a76a8;
+            background: #f8f9fa; border-radius: 20px; padding: 25px; margin: 25px 0;
+            display: none; border: 2px solid #4a76a8;
         }
-        .token-box {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            word-break: break-all;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            border: 1px solid #e0e0e0;
-            margin: 15px 0;
-            max-height: 180px;
-            overflow-y: auto;
-        }
-        .user-info {
-            background: #e8f0fe;
-            padding: 15px;
-            border-radius: 12px;
-            margin: 15px 0;
-            border-left: 4px solid #4a76a8;
-        }
-        .copy-button {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 15px 25px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-        }
-        .copy-button:hover {
-            background: #218838;
-        }
-        .warning {
-            background: #fff3cd;
-            border: 1px solid #ffeeba;
-            color: #856404;
-            padding: 18px;
-            border-radius: 14px;
-            margin: 25px 0 0;
-        }
+        .user-info { background: #e8f0fe; padding: 15px; border-radius: 12px; margin: 15px 0; border-left: 4px solid #4a76a8; }
+        .token-box { background: white; padding: 20px; border-radius: 12px; word-break: break-all; font-family: 'Courier New', monospace; font-size: 14px; border: 1px solid #e0e0e0; margin: 15px 0; max-height: 180px; overflow-y: auto; }
+        .copy-button { background: #28a745; color: white; border: none; padding: 15px 25px; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; }
+        .copy-button:hover { background: #218838; }
+        .error-message { background: #ffebee; color: #b71c1c; padding: 15px; border-radius: 12px; margin: 15px 0; display: none; }
+        .warning { background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 18px; border-radius: 14px; margin: 25px 0 0; }
+        .debug-info { background: #f0f0f0; padding: 10px; border-radius: 8px; font-family: monospace; font-size: 12px; margin: 10px 0; white-space: pre-wrap; display: none; max-height: 200px; overflow-y: auto; }
     </style>
 </head>
 <body>
     <div class="card">
         <h1>🔑 VK Токен Хелпер</h1>
         <p class="subtitle">Нажми кнопку — разреши доступ — токен появится здесь</p>
+        <button class="vk-button" id="authBtn" onclick="startAuth()">🔵 Получить токен ВКонтакте</button>
 
-        <button class="vk-button" onclick="startAuth()">
-            🔵 Получить токен ВКонтакте
-        </button>
+        <div class="loading" id="loading"><div class="spinner"></div><p>Получение токена...</p></div>
+        <div class="error-message" id="errorMessage"></div>
+        <div class="debug-info" id="debugInfo"></div>
 
         <div class="token-result" id="resultBlock">
             <div class="user-info" id="userInfo"></div>
             <div class="token-box" id="tokenDisplay"></div>
-            <button class="copy-button" onclick="copyToken()">
-                📋 Скопировать токен
-            </button>
+            <button class="copy-button" id="copyBtn" onclick="copyToken()">📋 Скопировать токен</button>
         </div>
-
-        <div class="warning">
-            ⚠️ Токен — ключ доступа к аккаунту. Никому не передавайте его.
-        </div>
+        <div class="warning">⚠️ Токен — ключ доступа к аккаунту. Никому не передавайте его.</div>
     </div>
 
     <script>
-        // ВАШ ID ПРИЛОЖЕНИЯ
-        const APP_ID = '54464046';
-
-        // Функция для получения параметров из URL (то что после #)
-        function getParamsFromHash() {
-            const hash = window.location.hash.substring(1); // убираем #
-            if (!hash) return null;
-            
-            const params = {};
-            hash.split('&').forEach(pair => {
-                const [key, value] = pair.split('=');
-                if (key && value) {
-                    params[key] = decodeURIComponent(value);
-                }
-            });
-            return params;
-        }
-
-        // Функция для получения параметров из query (то что после ?)
-        function getParamsFromQuery() {
-            const query = window.location.search.substring(1);
-            if (!query) return null;
-            
-            const params = {};
-            query.split('&').forEach(pair => {
-                const [key, value] = pair.split('=');
-                if (key && value) {
-                    params[key] = decodeURIComponent(value);
-                }
-            });
-            return params;
-        }
-
-        // Начать авторизацию
-        function startAuth() {
-            // Формируем ссылку для получения токена
-            const url = 'https://oauth.vk.com/authorize?' + 
-                'client_id=' + APP_ID + 
-                '&display=page' + 
-                '&redirect_uri=' + encodeURIComponent(window.location.href.split('#')[0]) + 
-                '&scope=messages,friends,photos,wall,groups' + 
-                '&response_type=token' +  // ВАЖНО: token, не code!
-                '&v=5.131';
-            
-            window.location.href = url;
-        }
-
-        // Копирование токена
-        function copyToken() {
-            const token = document.getElementById('tokenDisplay').textContent;
-            if (!token) return;
-            
-            navigator.clipboard.writeText(token).then(() => {
-                const btn = document.querySelector('.copy-button');
-                btn.textContent = '✅ Скопировано!';
-                setTimeout(() => btn.textContent = '📋 Скопировать токен', 2000);
-            });
-        }
-
-        // Проверяем при загрузке страницы
-        window.onload = function() {
-            // Сначала проверяем hash (там должен быть токен)
-            const hashParams = getParamsFromHash();
-            
-            if (hashParams && hashParams.access_token) {
-                // Токен найден! Показываем его
-                const token = hashParams.access_token;
-                const userId = hashParams.user_id || 'неизвестно';
-                const expiresIn = hashParams.expires_in || 0;
-                
-                // Показываем блок с токеном
-                document.getElementById('resultBlock').style.display = 'block';
-                document.getElementById('tokenDisplay').textContent = token;
-                document.getElementById('userInfo').innerHTML = `
-                    <strong>👤 ID пользователя:</strong> ${userId}<br>
-                    <strong>⏱ Срок действия:</strong> ${Math.floor(expiresIn/60)} минут
-                `;
-                
-                // Очищаем URL от токена (чтобы не светился)
-                window.location.hash = '';
-            } 
-            // Если в hash нет, проверяем query (может быть ошибка)
-            else {
-                const queryParams = getParamsFromQuery();
-                if (queryParams && queryParams.error) {
-                    alert('Ошибка: ' + queryParams.error_description || queryParams.error);
-                }
-            }
+        // =============================================
+        // НАСТРОЙКИ - ВАШИ ДАННЫЕ
+        // =============================================
+        const CONFIG = {
+            clientId: '54464046',
+            redirectUri: 'https://yurijd.github.io/vk-token-helper/',
+            proxyUrl: 'https://webkkam.ru/proxy.php', // Снова используем ваш прокси
+            scope: 'messages,friends,photos,wall,groups',
+            v: '5.199'
         };
+
+        let currentToken = '';
+
+        function generateRandomString(length) { /* ... эта функция не изменилась, оставьте как есть */ }
+        function base64URLEncode(buffer) { /* ... */ }
+        async function generateCodeChallenge(verifier) { /* ... */ }
+        function debugLog(...args) { /* ... */ }
+        function showError(message) { /* ... */ }
+        async function copyToken() { /* ... */ }
+
+        // =============================================
+        // ШАГ 1: АВТОРИЗАЦИЯ (отправляем на VK)
+        // =============================================
+        window.startAuth = async function() {
+            try {
+                const state = generateRandomString(32);
+                const codeVerifier = generateRandomString(43);
+                const codeChallenge = await generateCodeChallenge(codeVerifier);
+
+                sessionStorage.setItem('vk_state', state);
+                sessionStorage.setItem('vk_code_verifier', codeVerifier);
+                debugLog('🚀 Перенаправляем на VK...');
+
+                const params = new URLSearchParams({
+                    client_id: CONFIG.clientId, redirect_uri: CONFIG.redirectUri,
+                    response_type: 'code', scope: CONFIG.scope, state: state,
+                    code_challenge: codeChallenge, code_challenge_method: 'S256',
+                    v: CONFIG.v, display: 'page'
+                });
+                window.location.href = `https://id.vk.ru/authorize?${params.toString()}`;
+            } catch (error) { showError('Ошибка: ' + error.message); }
+        };
+
+        // =============================================
+        // ШАГ 2: ОБРАБОТКА ВОЗВРАТА (тут всё было правильно)
+        // =============================================
+        async function handleCallback() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            const error = urlParams.get('error');
+            const returnedState = urlParams.get('state');
+            const savedState = sessionStorage.getItem('vk_state');
+            const codeVerifier = sessionStorage.getItem('vk_code_verifier');
+
+            debugLog('📥 Получен code:', code ? '✅' : '❌');
+            if (error) { showError(error + ': ' + (urlParams.get('error_description') || '')); return; }
+            if (!code) { debugLog('ℹ️ Нет code, обычная загрузка'); return; }
+            if (!returnedState || returnedState !== savedState) { showError('Ошибка безопасности: неверный state'); return; }
+            if (!codeVerifier) { showError('Ошибка: code_verifier не найден'); return; }
+
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('authBtn').disabled = true;
+
+            try {
+                debugLog('📤 Отправляем code на proxy.php...');
+                // Отправляем code на ваш сервер
+                const response = await fetch(CONFIG.proxyUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code: code, code_verifier: codeVerifier })
+                });
+
+                const responseText = await response.text();
+                debugLog('📥 Ответ от proxy (первые 100):', responseText.substring(0, 100));
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ошибка ${response.status}: ${responseText.substring(0, 100)}`);
+                }
+
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (e) {
+                    debugLog('❌ Полный ответ:', responseText);
+                    throw new Error('Сервер вернул не JSON. Ответ: ' + responseText.substring(0, 200));
+                }
+
+                if (data.error) { throw new Error(data.error_description || data.error); }
+                if (!data.access_token) { throw new Error('Нет токена в ответе'); }
+
+                // ===== ЭТОТ БЛОК КОДА НУЖНО БЫЛО РАСКОММЕНТИРОВАТЬ =====
+                // ПОКАЗЫВАЕМ ТОКЕН ПОЛЬЗОВАТЕЛЮ НА СТРАНИЦЕ
+                currentToken = data.access_token;
+                document.getElementById('tokenDisplay').textContent = data.access_token;
+                document.getElementById('userInfo').innerHTML = `
+                    <strong>👤 ID пользователя:</strong> ${data.user_id || 'неизвестно'}<br>
+                    <strong>⏱ Действует:</strong> ${data.expires_in ? Math.floor(data.expires_in/60) + ' мин' : '1 час'}
+                `;
+                document.getElementById('resultBlock').style.display = 'block';
+                debugLog('✅ Токен получен и отображён на странице!');
+                // =======================================================
+
+                sessionStorage.removeItem('vk_state');
+                sessionStorage.removeItem('vk_code_verifier');
+                window.history.replaceState({}, document.title, window.location.pathname);
+
+            } catch (error) {
+                showError('Ошибка: ' + error.message);
+                debugLog('❌ Детали ошибки:', error);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('authBtn').disabled = false;
+            }
+        }
+        window.onload = handleCallback;
     </script>
 </body>
 </html>
