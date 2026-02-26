@@ -202,20 +202,42 @@
     </div>
 
     <script>
+        // =============================================
+        // НАСТРОЙКИ
+        // =============================================
         const CONFIG = {
             clientId: '54464046',
             redirectUri: 'https://yurijd.github.io/vk-token-helper/',
+            proxyUrl: 'https://webkkam.ru/proxy.php',
             scope: 'messages,friends,photos,wall,groups',
             v: '5.199'
         };
 
         let currentToken = '';
 
+        // =============================================
+        // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+        // =============================================
+
         function generateRandomString(length) {
             const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
             const array = new Uint8Array(length);
             window.crypto.getRandomValues(array);
             return Array.from(array, byte => charset[byte % charset.length]).join('');
+        }
+
+        function base64URLEncode(buffer) {
+            return btoa(String.fromCharCode(...new Uint8Array(buffer)))
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=+$/, '');
+        }
+
+        async function generateCodeChallenge(verifier) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(verifier);
+            const hash = await window.crypto.subtle.digest('SHA-256', data);
+            return base64URLEncode(hash);
         }
 
         function debugLog(...args) {
@@ -242,7 +264,7 @@
                 <strong>⏱ Действует:</strong> ${expiresIn ? Math.floor(expiresIn/60) + ' мин' : '1 час'}
             `;
             document.getElementById('resultBlock').style.display = 'block';
-            debugLog('✅ Токен получен и отображён на странице');
+            debugLog('✅ Токен получен и отображён');
         }
 
         async function copyToken() {
@@ -254,58 +276,34 @@
         }
 
         // =============================================
-        // ФУНКЦИЯ ДЛЯ ИЗВЛЕЧЕНИЯ ТОКЕНА ИЗ URL
-        // =============================================
-        function getTokenFromUrl() {
-            // Пробуем получить из hash (то что после #)
-            if (window.location.hash) {
-                const hash = window.location.hash.substring(1);
-                const params = new URLSearchParams(hash);
-                
-                const token = params.get('access_token');
-                const userId = params.get('user_id');
-                const expiresIn = params.get('expires_in');
-                
-                if (token) {
-                    debugLog('🔑 Токен найден в URL!');
-                    return { token, userId, expiresIn };
-                }
-            }
-            
-            // Пробуем получить из query (то что после ?)
-            const urlParams = new URLSearchParams(window.location.search);
-            const token = urlParams.get('access_token');
-            const userId = urlParams.get('user_id');
-            const expiresIn = urlParams.get('expires_in');
-            
-            if (token) {
-                debugLog('🔑 Токен найден в query!');
-                return { token, userId, expiresIn };
-            }
-            
-            return null;
-        }
-
-        // =============================================
-        // АВТОРИЗАЦИЯ (старый способ с token)
+        // ШАГ 1: АВТОРИЗАЦИЯ (ПОЛУЧАЕМ CODE)
         // =============================================
         window.startAuth = async function() {
             try {
                 const state = generateRandomString(32);
+                const codeVerifier = generateRandomString(43);
+                const codeChallenge = await generateCodeChallenge(codeVerifier);
+
                 sessionStorage.setItem('vk_state', state);
+                sessionStorage.setItem('vk_code_verifier', codeVerifier);
+
+                debugLog('🚀 Перенаправляем на VK...');
+                debugLog('📌 State:', state);
+                debugLog('🔐 Code Verifier сохранён');
 
                 const params = new URLSearchParams({
                     client_id: CONFIG.clientId,
                     redirect_uri: CONFIG.redirectUri,
-                    response_type: 'token',        // ВАЖНО: token, а не code!
+                    response_type: 'code',
                     scope: CONFIG.scope,
                     state: state,
+                    code_challenge: codeChallenge,
+                    code_challenge_method: 'S256',
                     v: CONFIG.v,
                     display: 'page'
                 });
 
-                debugLog('🚀 Перенаправляем на VK...');
-                window.location.href = `https://oauth.vk.com/authorize?${params.toString()}`;
+                window.location.href = `https://id.vk.ru/authorize?${params.toString()}`;
 
             } catch (error) {
                 showError('Ошибка: ' + error.message);
@@ -313,32 +311,86 @@
         };
 
         // =============================================
-        // ОБРАБОТКА ВОЗВРАТА
+        // ШАГ 2: ОБРАБОТКА ВОЗВРАТА (ОБМЕНИВАЕМ CODE НА ТОКЕН)
         // =============================================
         async function handleCallback() {
-            // Проверяем ошибки в URL
             const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
             const error = urlParams.get('error');
-            
+            const returnedState = urlParams.get('state');
+            const savedState = sessionStorage.getItem('vk_state');
+            const codeVerifier = sessionStorage.getItem('vk_code_verifier');
+
+            debugLog('📥 Получен code:', code ? '✅' : '❌');
+            debugLog('📥 State совпадает:', returnedState === savedState ? '✅' : '❌');
+
             if (error) {
                 showError(error + ': ' + (urlParams.get('error_description') || ''));
                 return;
             }
 
-            // Пробуем получить токен из URL
-            const tokenData = getTokenFromUrl();
-            
-            if (tokenData) {
-                // Токен найден! Показываем его на странице
-                showToken(tokenData.token, tokenData.userId, tokenData.expiresIn);
+            if (!code) {
+                debugLog('ℹ️ Нет code, обычная загрузка');
+                return;
+            }
+
+            if (!returnedState || returnedState !== savedState) {
+                showError('Ошибка безопасности: неверный state');
+                return;
+            }
+
+            if (!codeVerifier) {
+                showError('Ошибка: code_verifier не найден');
+                return;
+            }
+
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('authBtn').disabled = true;
+
+            try {
+                debugLog('📤 Отправляем code на proxy.php...');
                 
-                // Очищаем URL от токена (безопасность)
-                window.history.replaceState({}, document.title, window.location.pathname);
+                const response = await fetch(CONFIG.proxyUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        code: code, 
+                        code_verifier: codeVerifier 
+                    })
+                });
+
+                const responseText = await response.text();
+                debugLog('📥 Ответ от proxy (первые 100 символов):', responseText.substring(0, 100));
+
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (e) {
+                    debugLog('❌ Полный ответ:', responseText);
+                    throw new Error('Сервер вернул не JSON. Ответ: ' + responseText.substring(0, 200));
+                }
+
+                if (data.error) {
+                    throw new Error(data.error_description || data.error);
+                }
+
+                if (!data.access_token) {
+                    throw new Error('Нет токена в ответе');
+                }
+
+                showToken(data.access_token, data.user_id, data.expires_in);
                 
-                // Очищаем storage
                 sessionStorage.removeItem('vk_state');
-            } else {
-                debugLog('ℹ️ Нет токена в URL, обычная загрузка');
+                sessionStorage.removeItem('vk_code_verifier');
+                
+                window.history.replaceState({}, document.title, window.location.pathname);
+
+            } catch (error) {
+                showError('Ошибка: ' + error.message);
+                debugLog('❌ Детали ошибки:', error);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('authBtn').disabled = false;
             }
         }
 
