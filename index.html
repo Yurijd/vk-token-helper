@@ -227,7 +227,7 @@
         </div>
 
         <div class="footer">
-            Версия 3.2 • Добавлена поддержка самоподписанных SSL-сертификатов
+            Версия 3.3 • Альтернативный прокси для самоподписанных сертификатов
         </div>
     </div>
 
@@ -238,8 +238,8 @@
         const CONFIG = {
             clientId: '54464046',
             redirectUri: 'https://yurijd.github.io/vk-token-helper/',
-            // ✅ Добавлен параметр disableSSL для обхода проблемы с самоподписанным сертификатом
-            proxyUrl: 'https://cors-anywhere.herokuapp.com/http://webkkam.ru/proxy.php?disableSSL',
+            // ✅ ЗАМЕНА: Используем другой прокси, который игнорирует SSL ошибки
+            proxyUrl: 'https://api.codetabs.com/v1/proxy/?quest=http://webkkam.ru/proxy.php',
             scope: 'messages,friends,photos,wall,groups',
             v: '5.199'
         };
@@ -250,7 +250,7 @@
         // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
         // =============================================
 
-        // Генерация строки ТОЛЬКО из букв и цифр (без точек и спецсимволов)
+        // Генерация строки ТОЛЬКО из букв и цифр
         function generateRandomString(length) {
             const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
             const array = new Uint8Array(length);
@@ -358,7 +358,6 @@
                     display: 'page'
                 });
 
-                // Используем id.vk.ru вместо oauth.vk.com
                 window.location.href = `https://id.vk.ru/authorize?${params.toString()}`;
 
             } catch (error) {
@@ -413,12 +412,13 @@
             try {
                 debugLog('📤 Отправляем запрос к proxy...');
                 
-                // ✅ Используем proxyUrl с параметром disableSSL
-                const response = await fetch(CONFIG.proxyUrl, {
+                // ✅ Используем альтернативный прокси, который не проверяет SSL
+                const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=http://webkkam.ru/proxy.php';
+                
+                const response = await fetch(proxyUrl, {
                     method: 'POST',
                     headers: { 
-                        'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
                         code: code,
@@ -426,7 +426,6 @@
                     })
                 });
 
-                // Получаем ответ как текст
                 const responseText = await response.text();
                 debugLog('📥 Ответ (первые 100 символов):', responseText.substring(0, 100));
 
