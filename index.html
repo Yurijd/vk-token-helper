@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VK Токен Хелпер</title>
     <style>
+        /* Стили как в предыдущей версии */
         * {
             margin: 0;
             padding: 0;
@@ -56,19 +57,16 @@
             width: 100%;
             transition: all 0.3s;
             margin: 20px 0;
-            box-shadow: 0 4px 10px rgba(74, 118, 168, 0.3);
         }
 
         .vk-button:hover {
             background: #3a5f87;
             transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(74, 118, 168, 0.4);
         }
 
         .vk-button:disabled {
             opacity: 0.6;
             cursor: not-allowed;
-            transform: none;
         }
 
         .loading {
@@ -121,7 +119,6 @@
             margin: 15px 0;
             max-height: 180px;
             overflow-y: auto;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
         }
 
         .copy-button {
@@ -134,23 +131,19 @@
             font-weight: 600;
             cursor: pointer;
             width: 100%;
-            transition: all 0.3s;
         }
 
         .copy-button:hover {
             background: #218838;
-            transform: translateY(-2px);
         }
 
         .error-message {
             background: #ffebee;
-            border: 1px solid #ffcdd2;
             color: #b71c1c;
             padding: 15px;
             border-radius: 12px;
             margin: 15px 0;
             display: none;
-            font-size: 14px;
         }
 
         .warning {
@@ -161,20 +154,6 @@
             border-radius: 14px;
             margin: 25px 0 0;
             font-size: 14px;
-            display: flex;
-            gap: 12px;
-            align-items: flex-start;
-        }
-
-        .warning-icon {
-            font-size: 20px;
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 25px;
-            color: #888;
-            font-size: 13px;
         }
 
         .debug-info {
@@ -219,26 +198,14 @@
         </div>
 
         <div class="warning">
-            <span class="warning-icon">⚠️</span>
-            <div>
-                <strong>Никому не передавайте токен!</strong><br>
-                Токен — ключ доступа к аккаунту. Он остаётся только в вашем браузере.
-            </div>
-        </div>
-
-        <div class="footer">
-            Версия 4.0 • Финальная • Работает через HTTPS
+            ⚠️ Токен — ключ доступа к аккаунту. Никому не передавайте его.
         </div>
     </div>
 
     <script>
-        // =============================================
-        // НАСТРОЙКИ - ВСЁ ЧЕРЕЗ HTTPS!
-        // =============================================
         const CONFIG = {
             clientId: '54464046',
             redirectUri: 'https://yurijd.github.io/vk-token-helper/',
-            // ✅ ПРЯМОЙ HTTPS ЗАПРОС К ВАШЕМУ СЕРВЕРУ
             proxyUrl: 'https://webkkam.ru/proxy.php',
             scope: 'messages,friends,photos,wall,groups',
             v: '5.199'
@@ -246,11 +213,6 @@
 
         let currentToken = '';
 
-        // =============================================
-        // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
-        // =============================================
-
-        // Генерация строки ТОЛЬКО из букв и цифр
         function generateRandomString(length) {
             const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
             const array = new Uint8Array(length);
@@ -258,7 +220,6 @@
             return Array.from(array, byte => charset[byte % charset.length]).join('');
         }
 
-        // Base64URL encode
         function base64URLEncode(buffer) {
             return btoa(String.fromCharCode(...new Uint8Array(buffer)))
                 .replace(/\+/g, '-')
@@ -266,7 +227,6 @@
                 .replace(/=+$/, '');
         }
 
-        // Генерация code_challenge
         async function generateCodeChallenge(verifier) {
             const encoder = new TextEncoder();
             const data = encoder.encode(verifier);
@@ -274,74 +234,49 @@
             return base64URLEncode(hash);
         }
 
-        // Отладка
         function debugLog(...args) {
             const debugDiv = document.getElementById('debugInfo');
             const timestamp = new Date().toLocaleTimeString();
-            const message = args.map(arg => 
-                typeof arg === 'object' ? JSON.stringify(arg) : arg
-            ).join(' ');
-            
-            debugDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            debugDiv.innerHTML += `[${timestamp}] ${args.join(' ')}\n`;
             debugDiv.style.display = 'block';
             console.log(...args);
         }
 
-        // Показать ошибку
         function showError(message) {
             const errorDiv = document.getElementById('errorMessage');
             errorDiv.textContent = '❌ ' + message;
             errorDiv.style.display = 'block';
             debugLog('ERROR:', message);
-            
-            setTimeout(() => {
-                errorDiv.style.display = 'none';
-            }, 7000);
+            setTimeout(() => errorDiv.style.display = 'none', 5000);
         }
 
-        // Показать токен
         function showToken(token, userId, expiresIn) {
             currentToken = token;
             document.getElementById('tokenDisplay').textContent = token;
             document.getElementById('userInfo').innerHTML = `
-                <strong>👤 ID пользователя:</strong> ${userId || 'неизвестно'}<br>
+                <strong>👤 ID:</strong> ${userId || 'неизвестно'}<br>
                 <strong>⏱ Действует:</strong> ${expiresIn ? Math.floor(expiresIn/60) + ' мин' : '1 час'}
             `;
             document.getElementById('resultBlock').style.display = 'block';
-            debugLog('✅ Токен получен для пользователя', userId);
+            debugLog('✅ Токен получен');
         }
 
-        // Копирование токена
         async function copyToken() {
             if (!currentToken) return;
-            try {
-                await navigator.clipboard.writeText(currentToken);
-                const btn = document.getElementById('copyBtn');
-                btn.textContent = '✅ Скопировано!';
-                setTimeout(() => btn.textContent = '📋 Скопировать токен', 2000);
-            } catch (err) {
-                showError('Не удалось скопировать токен');
-            }
+            await navigator.clipboard.writeText(currentToken);
+            const btn = document.getElementById('copyBtn');
+            btn.textContent = '✅ Скопировано!';
+            setTimeout(() => btn.textContent = '📋 Скопировать токен', 2000);
         }
 
-        // =============================================
-        // ШАГ 1: АВТОРИЗАЦИЯ
-        // =============================================
         window.startAuth = async function() {
             try {
-                sessionStorage.removeItem('vk_state');
-                sessionStorage.removeItem('vk_code_verifier');
-
                 const state = generateRandomString(32);
                 const codeVerifier = generateRandomString(43);
                 const codeChallenge = await generateCodeChallenge(codeVerifier);
 
                 sessionStorage.setItem('vk_state', state);
                 sessionStorage.setItem('vk_code_verifier', codeVerifier);
-
-                debugLog('🚀 Начинаем авторизацию');
-                debugLog('📌 State:', state);
-                debugLog('🔐 Code Verifier:', codeVerifier);
 
                 const params = new URLSearchParams({
                     client_id: CONFIG.clientId,
@@ -362,40 +297,26 @@
             }
         };
 
-        // =============================================
-        // ШАГ 2: ОБРАБОТКА ВОЗВРАТА
-        // =============================================
         async function handleCallback() {
             const urlParams = new URLSearchParams(window.location.search);
-            
             const code = urlParams.get('code');
             const error = urlParams.get('error');
-            const errorDescription = urlParams.get('error_description');
             const returnedState = urlParams.get('state');
-            
             const savedState = sessionStorage.getItem('vk_state');
             const codeVerifier = sessionStorage.getItem('vk_code_verifier');
 
-            debugLog('🔄 Обработка возврата');
-            debugLog('📥 Code:', code ? '✅' : '❌');
-            debugLog('📥 State получен:', returnedState);
-            debugLog('💾 State сохранён:', savedState);
+            debugLog('Code получен:', code ? '✅' : '❌');
+            debugLog('State совпадает:', returnedState === savedState ? '✅' : '❌');
 
             if (error) {
-                showError(`${error}: ${errorDescription || ''}`);
+                showError(error);
                 return;
             }
 
-            if (!code) {
-                debugLog('ℹ️ Нет code, обычная загрузка');
-                return;
-            }
+            if (!code) return;
 
-            // Проверяем state
-            if (returnedState && savedState && returnedState !== savedState) {
-                showError('Ошибка безопасности: недействительный state');
-                debugLog('Ожидался:', savedState);
-                debugLog('Получен:', returnedState);
+            if (!returnedState || returnedState !== savedState) {
+                showError('Ошибка безопасности');
                 return;
             }
 
@@ -408,60 +329,41 @@
             document.getElementById('authBtn').disabled = true;
 
             try {
-                debugLog('📤 Отправляем запрос к proxy...');
+                debugLog('Отправляем запрос к proxy...');
                 
-                // ✅ ПРЯМОЙ HTTPS ЗАПРОС
                 const response = await fetch(CONFIG.proxyUrl, {
                     method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        code: code,
-                        code_verifier: codeVerifier
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code, code_verifier: codeVerifier })
                 });
 
-                const responseText = await response.text();
-                debugLog('📥 Ответ:', responseText);
+                const text = await response.text();
+                debugLog('Ответ от proxy:', text);
 
-                // Пытаемся распарсить JSON
                 let data;
                 try {
-                    data = JSON.parse(responseText);
+                    data = JSON.parse(text);
                 } catch (e) {
-                    throw new Error('Сервер вернул не JSON: ' + responseText.substring(0, 200));
+                    throw new Error('Не JSON: ' + text.substring(0, 100));
                 }
 
-                if (data.error) {
-                    throw new Error(data.error_description || data.error);
-                }
+                if (data.error) throw new Error(data.error_description || data.error);
+                if (!data.access_token) throw new Error('Нет токена');
 
-                if (!data.access_token) {
-                    throw new Error('Нет токена в ответе');
-                }
-
-                // УСПЕХ!
                 showToken(data.access_token, data.user_id, data.expires_in);
                 
-                sessionStorage.removeItem('vk_state');
-                sessionStorage.removeItem('vk_code_verifier');
-                
+                sessionStorage.clear();
                 window.history.replaceState({}, document.title, window.location.pathname);
 
             } catch (error) {
                 showError('Ошибка: ' + error.message);
-                debugLog('❌ Детали:', error);
             } finally {
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('authBtn').disabled = false;
             }
         }
 
-        window.onload = function() {
-            debugLog('📄 Страница загружена');
-            handleCallback();
-        };
+        window.onload = handleCallback;
     </script>
 </body>
 </html>
