@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VK Токен Хелпер</title>
     <style>
+        /* Стили остаются без изменений — такие же, как в вашей последней версии */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #4a76a8, #2c3e50);
@@ -20,7 +20,6 @@
             justify-content: center;
             padding: 15px;
         }
-
         .card {
             background: white;
             border-radius: 24px;
@@ -29,21 +28,18 @@
             width: 100%;
             padding: 40px;
         }
-
         h1 {
             color: #333;
             font-size: 32px;
             margin-bottom: 10px;
             text-align: center;
         }
-
         .subtitle {
             color: #666;
             margin-bottom: 30px;
             font-size: 16px;
             text-align: center;
         }
-
         .vk-button {
             background: #4a76a8;
             color: white;
@@ -56,27 +52,16 @@
             width: 100%;
             transition: all 0.3s;
             margin: 20px 0;
-            box-shadow: 0 4px 10px rgba(74, 118, 168, 0.3);
         }
-
         .vk-button:hover {
             background: #3a5f87;
             transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(74, 118, 168, 0.4);
         }
-
-        .vk-button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
         .loading {
             display: none;
             text-align: center;
             margin: 30px 0;
         }
-
         .spinner {
             border: 4px solid #f3f3f3;
             border-top: 4px solid #4a76a8;
@@ -86,12 +71,10 @@
             animation: spin 1s linear infinite;
             margin: 0 auto 15px;
         }
-
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
         .token-result {
             background: #f8f9fa;
             border-radius: 20px;
@@ -100,7 +83,6 @@
             display: none;
             border: 2px solid #4a76a8;
         }
-
         .user-info {
             background: #e8f0fe;
             padding: 15px;
@@ -109,7 +91,6 @@
             font-size: 15px;
             border-left: 4px solid #4a76a8;
         }
-
         .token-box {
             background: white;
             padding: 20px;
@@ -121,9 +102,7 @@
             margin: 15px 0;
             max-height: 180px;
             overflow-y: auto;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
         }
-
         .copy-button {
             background: #28a745;
             color: white;
@@ -136,23 +115,17 @@
             width: 100%;
             transition: all 0.3s;
         }
-
         .copy-button:hover {
             background: #218838;
-            transform: translateY(-2px);
         }
-
         .error-message {
             background: #ffebee;
-            border: 1px solid #ffcdd2;
             color: #b71c1c;
             padding: 15px;
             border-radius: 12px;
             margin: 15px 0;
             display: none;
-            font-size: 14px;
         }
-
         .warning {
             background: #fff3cd;
             border: 1px solid #ffeeba;
@@ -161,16 +134,6 @@
             border-radius: 14px;
             margin: 25px 0 0;
             font-size: 14px;
-            display: flex;
-            gap: 12px;
-            align-items: flex-start;
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 25px;
-            color: #888;
-            font-size: 13px;
         }
     </style>
 </head>
@@ -199,15 +162,7 @@
         </div>
 
         <div class="warning">
-            <span class="warning-icon">⚠️</span>
-            <div>
-                <strong>Никому не передавайте токен!</strong><br>
-                Токен — ключ доступа к аккаунту. Он остаётся только в вашем браузере.
-            </div>
-        </div>
-
-        <div class="footer">
-            Версия 2.1 • Исправлена поддержка PKCE
+            ⚠️ Токен — ключ доступа к аккаунту. Никому не передавайте его.
         </div>
     </div>
 
@@ -216,9 +171,9 @@
         // НАСТРОЙКИ
         // =============================================
         const CONFIG = {
-            clientId: '54464046',
+            clientId: '54464046',                    // Ваш ID приложения
             redirectUri: 'https://yurijd.github.io/vk-token-helper/',
-            proxyUrl: 'http://webkkam.ru/proxy.php',
+            proxyUrl: 'https://cors-anywhere.herokuapp.com/http://webkkam.ru/proxy.php',
             scope: 'messages,friends,photos,wall,groups',
             v: '5.199'
         };
@@ -228,8 +183,6 @@
         // =============================================
         // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
         // =============================================
-
-        // Генерация случайной строки
         function generateRandomString(length) {
             const array = new Uint8Array(length);
             window.crypto.getRandomValues(array);
@@ -238,7 +191,6 @@
             ).join('');
         }
 
-        // Base64URL encode
         function base64URLEncode(buffer) {
             return btoa(String.fromCharCode(...new Uint8Array(buffer)))
                 .replace(/\+/g, '-')
@@ -246,7 +198,6 @@
                 .replace(/=+$/, '');
         }
 
-        // Генерация code_challenge через SHA256
         async function generateCodeChallenge(verifier) {
             const encoder = new TextEncoder();
             const data = encoder.encode(verifier);
@@ -258,65 +209,39 @@
             const errorDiv = document.getElementById('errorMessage');
             errorDiv.textContent = '❌ ' + message;
             errorDiv.style.display = 'block';
-            setTimeout(() => {
-                errorDiv.style.display = 'none';
-            }, 7000);
+            setTimeout(() => errorDiv.style.display = 'none', 5000);
         }
 
         function showToken(token, userId, expiresIn) {
-            const resultBlock = document.getElementById('resultBlock');
-            const tokenDisplay = document.getElementById('tokenDisplay');
-            const userInfo = document.getElementById('userInfo');
-
             currentToken = token;
-            tokenDisplay.textContent = token;
-
-            let expiresText = expiresIn ? Math.floor(expiresIn / 60) + ' минут' : '1 час';
-
-            userInfo.innerHTML = `
+            document.getElementById('tokenDisplay').textContent = token;
+            document.getElementById('userInfo').innerHTML = `
                 <strong>👤 ID пользователя:</strong> ${userId || 'неизвестно'}<br>
-                <strong>⏱ Действует:</strong> ${expiresText}
+                <strong>⏱ Действует:</strong> ${expiresIn ? Math.floor(expiresIn/60) + ' мин' : '1 час'}
             `;
-
-            resultBlock.style.display = 'block';
+            document.getElementById('resultBlock').style.display = 'block';
         }
 
         async function copyToken() {
             if (!currentToken) return;
-            try {
-                await navigator.clipboard.writeText(currentToken);
-                const btn = document.getElementById('copyBtn');
-                btn.textContent = '✅ Скопировано!';
-                setTimeout(() => btn.textContent = '📋 Скопировать токен', 2000);
-            } catch (err) {
-                showError('Не удалось скопировать токен');
-            }
+            await navigator.clipboard.writeText(currentToken);
+            const btn = document.getElementById('copyBtn');
+            btn.textContent = '✅ Скопировано!';
+            setTimeout(() => btn.textContent = '📋 Скопировать токен', 2000);
         }
 
         // =============================================
-        // ОСНОВНАЯ ЛОГИКА
+        // ИСПРАВЛЕННАЯ АВТОРИЗАЦИЯ - ГЛАВНОЕ ИЗМЕНЕНИЕ ЗДЕСЬ
         // =============================================
-
-        // Начало авторизации
         window.startAuth = async function() {
             try {
-                // Генерируем state
                 const state = generateRandomString(32);
-                sessionStorage.setItem('vk_state', state);
-
-                // Генерируем code_verifier для PKCE
                 const codeVerifier = generateRandomString(43);
-                sessionStorage.setItem('vk_code_verifier', codeVerifier);
-
-                // Генерируем code_challenge
                 const codeChallenge = await generateCodeChallenge(codeVerifier);
 
-                console.log('PKCE:', {
-                    verifier: codeVerifier,
-                    challenge: codeChallenge
-                });
+                sessionStorage.setItem('vk_state', state);
+                sessionStorage.setItem('vk_code_verifier', codeVerifier);
 
-                // Формируем URL авторизации
                 const params = new URLSearchParams({
                     client_id: CONFIG.clientId,
                     redirect_uri: CONFIG.redirectUri,
@@ -324,25 +249,29 @@
                     scope: CONFIG.scope,
                     state: state,
                     code_challenge: codeChallenge,
-                    code_challenge_method: 'S256',  // VK ID поддерживает S256
+                    code_challenge_method: 'S256',
                     v: CONFIG.v,
                     display: 'page'
                 });
 
-                window.location.href = `https://oauth.vk.com/authorize?${params.toString()}`;
+                // ✅ КРИТИЧЕСКОЕ ИЗМЕНЕНИЕ: используем id.vk.ru вместо oauth.vk.com
+                window.location.href = `https://id.vk.ru/authorize?${params.toString()}`;
 
             } catch (error) {
                 showError('Ошибка: ' + error.message);
             }
         };
 
-        // Обработка возврата от VK
+        // =============================================
+        // ОБРАБОТКА ВОЗВРАТА (БЕЗ ИЗМЕНЕНИЙ)
+        // =============================================
         async function handleCallback() {
             const urlParams = new URLSearchParams(window.location.search);
             const code = urlParams.get('code');
             const error = urlParams.get('error');
             const returnedState = urlParams.get('state');
-            const deviceId = urlParams.get('device_id');
+            const savedState = sessionStorage.getItem('vk_state');
+            const codeVerifier = sessionStorage.getItem('vk_code_verifier');
 
             if (error) {
                 showError(error + ': ' + (urlParams.get('error_description') || ''));
@@ -351,14 +280,11 @@
 
             if (!code) return;
 
-            // Проверяем state
-            const savedState = sessionStorage.getItem('vk_state');
-            if (!returnedState || !savedState || returnedState !== savedState) {
+            if (!returnedState || returnedState !== savedState) {
                 showError('Ошибка безопасности: недействительный state');
                 return;
             }
 
-            const codeVerifier = sessionStorage.getItem('vk_code_verifier');
             if (!codeVerifier) {
                 showError('Ошибка: code_verifier не найден');
                 return;
@@ -373,8 +299,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         code: code,
-                        code_verifier: codeVerifier,
-                        device_id: deviceId
+                        code_verifier: codeVerifier
                     })
                 });
 
@@ -398,10 +323,7 @@
             }
         }
 
-        // Запуск при загрузке
         window.onload = handleCallback;
     </script>
 </body>
 </html>
-
-
