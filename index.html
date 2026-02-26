@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VK Токен Хелпер</title>
     <style>
+        /* Стили как в предыдущей версии */
         * {
             margin: 0;
             padding: 0;
@@ -276,7 +277,7 @@
         }
 
         // =============================================
-        // ШАГ 1: АВТОРИЗАЦИЯ (ПОЛУЧАЕМ CODE)
+        // ШАГ 1: АВТОРИЗАЦИЯ
         // =============================================
         window.startAuth = async function() {
             try {
@@ -288,8 +289,6 @@
                 sessionStorage.setItem('vk_code_verifier', codeVerifier);
 
                 debugLog('🚀 Перенаправляем на VK...');
-                debugLog('📌 State:', state);
-                debugLog('🔐 Code Verifier сохранён');
 
                 const params = new URLSearchParams({
                     client_id: CONFIG.clientId,
@@ -311,7 +310,7 @@
         };
 
         // =============================================
-        // ШАГ 2: ОБРАБОТКА ВОЗВРАТА (ОБМЕНИВАЕМ CODE НА ТОКЕН)
+        // ШАГ 2: ОБРАБОТКА ВОЗВРАТА
         // =============================================
         async function handleCallback() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -322,7 +321,6 @@
             const codeVerifier = sessionStorage.getItem('vk_code_verifier');
 
             debugLog('📥 Получен code:', code ? '✅' : '❌');
-            debugLog('📥 State совпадает:', returnedState === savedState ? '✅' : '❌');
 
             if (error) {
                 showError(error + ': ' + (urlParams.get('error_description') || ''));
@@ -359,15 +357,23 @@
                     })
                 });
 
-                const responseText = await response.text();
-                debugLog('📥 Ответ от proxy (первые 100 символов):', responseText.substring(0, 100));
+                // Проверяем статус ответа
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    debugLog('❌ Ошибка HTTP:', response.status, errorText);
+                    throw new Error(`HTTP ошибка ${response.status}`);
+                }
 
+                const responseText = await response.text();
+                debugLog('📥 Ответ от proxy (первые 100):', responseText.substring(0, 100));
+
+                // Пробуем распарсить JSON
                 let data;
                 try {
                     data = JSON.parse(responseText);
                 } catch (e) {
                     debugLog('❌ Полный ответ:', responseText);
-                    throw new Error('Сервер вернул не JSON. Ответ: ' + responseText.substring(0, 200));
+                    throw new Error('Сервер вернул не JSON');
                 }
 
                 if (data.error) {
@@ -378,6 +384,7 @@
                     throw new Error('Нет токена в ответе');
                 }
 
+                // УСПЕХ!
                 showToken(data.access_token, data.user_id, data.expires_in);
                 
                 sessionStorage.removeItem('vk_state');
