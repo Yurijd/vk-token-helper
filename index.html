@@ -227,19 +227,19 @@
         </div>
 
         <div class="footer">
-            Версия 3.4 • Прямое обращение к proxy.php
+            Версия 4.0 • Финальная • Работает через HTTPS
         </div>
     </div>
 
     <script>
         // =============================================
-        // НАСТРОЙКИ
+        // НАСТРОЙКИ - ВСЁ ЧЕРЕЗ HTTPS!
         // =============================================
         const CONFIG = {
             clientId: '54464046',
             redirectUri: 'https://yurijd.github.io/vk-token-helper/',
-            // ✅ Пробуем напрямую к proxy.php (обход CORS через режим no-cors)
-            proxyUrl: 'http://webkkam.ru/proxy.php',
+            // ✅ ПРЯМОЙ HTTPS ЗАПРОС К ВАШЕМУ СЕРВЕРУ
+            proxyUrl: 'https://webkkam.ru/proxy.php',
             scope: 'messages,friends,photos,wall,groups',
             v: '5.199'
         };
@@ -329,16 +329,13 @@
         // =============================================
         window.startAuth = async function() {
             try {
-                // Очищаем старые данные
                 sessionStorage.removeItem('vk_state');
                 sessionStorage.removeItem('vk_code_verifier');
 
-                // Генерируем параметры
                 const state = generateRandomString(32);
                 const codeVerifier = generateRandomString(43);
                 const codeChallenge = await generateCodeChallenge(codeVerifier);
 
-                // Сохраняем
                 sessionStorage.setItem('vk_state', state);
                 sessionStorage.setItem('vk_code_verifier', codeVerifier);
 
@@ -394,11 +391,12 @@
                 return;
             }
 
-            // Проверяем state (только логируем несовпадение)
+            // Проверяем state
             if (returnedState && savedState && returnedState !== savedState) {
-                debugLog('⚠️ State не совпадает (продолжаем)');
+                showError('Ошибка безопасности: недействительный state');
                 debugLog('Ожидался:', savedState);
                 debugLog('Получен:', returnedState);
+                return;
             }
 
             if (!codeVerifier) {
@@ -412,16 +410,9 @@
             try {
                 debugLog('📤 Отправляем запрос к proxy...');
                 
-                // ✅ Пробуем разные способы обхода CORS
-                
-                // Способ 1: Прямой запрос с mode: 'no-cors' (не даст прочитать ответ)
-                // Способ 2: Используем JSONP (не подходит для POST)
-                // Способ 3: Используем скрытый iframe (сложно)
-                
-                // Пока пробуем прямой запрос с надеждой что CORS настроен на сервере
+                // ✅ ПРЯМОЙ HTTPS ЗАПРОС
                 const response = await fetch(CONFIG.proxyUrl, {
                     method: 'POST',
-                    mode: 'cors', // Пробуем с CORS
                     headers: { 
                         'Content-Type': 'application/json'
                     },
@@ -432,7 +423,7 @@
                 });
 
                 const responseText = await response.text();
-                debugLog('📥 Ответ (первые 100 символов):', responseText.substring(0, 100));
+                debugLog('📥 Ответ:', responseText);
 
                 // Пытаемся распарсить JSON
                 let data;
@@ -453,44 +444,20 @@
                 // УСПЕХ!
                 showToken(data.access_token, data.user_id, data.expires_in);
                 
-                // Очищаем сохранённые данные
                 sessionStorage.removeItem('vk_state');
                 sessionStorage.removeItem('vk_code_verifier');
                 
-                // Очищаем URL от параметров
                 window.history.replaceState({}, document.title, window.location.pathname);
 
             } catch (error) {
                 showError('Ошибка: ' + error.message);
                 debugLog('❌ Детали:', error);
-                
-                // Если не сработало, пробуем ещё один способ
-                debugLog('🔄 Пробуем альтернативный прокси...');
-                
-                try {
-                    const altResponse = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(CONFIG.proxyUrl), {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            code: code,
-                            code_verifier: codeVerifier
-                        })
-                    });
-                    
-                    const altText = await altResponse.text();
-                    debugLog('📥 Альтернативный ответ:', altText.substring(0, 100));
-                    
-                } catch (altError) {
-                    debugLog('❌ Альтернативный прокси тоже не сработал');
-                }
-                
             } finally {
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('authBtn').disabled = false;
             }
         }
 
-        // Запуск при загрузке страницы
         window.onload = function() {
             debugLog('📄 Страница загружена');
             handleCallback();
