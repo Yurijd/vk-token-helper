@@ -227,7 +227,7 @@
         </div>
 
         <div class="footer">
-            Версия 3.3 • Альтернативный прокси для самоподписанных сертификатов
+            Версия 3.4 • Прямое обращение к proxy.php
         </div>
     </div>
 
@@ -238,8 +238,8 @@
         const CONFIG = {
             clientId: '54464046',
             redirectUri: 'https://yurijd.github.io/vk-token-helper/',
-            // ✅ ЗАМЕНА: Используем другой прокси, который игнорирует SSL ошибки
-            proxyUrl: 'https://api.codetabs.com/v1/proxy/?quest=http://webkkam.ru/proxy.php',
+            // ✅ Пробуем напрямую к proxy.php (обход CORS через режим no-cors)
+            proxyUrl: 'http://webkkam.ru/proxy.php',
             scope: 'messages,friends,photos,wall,groups',
             v: '5.199'
         };
@@ -412,11 +412,16 @@
             try {
                 debugLog('📤 Отправляем запрос к proxy...');
                 
-                // ✅ Используем альтернативный прокси, который не проверяет SSL
-                const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=http://webkkam.ru/proxy.php';
+                // ✅ Пробуем разные способы обхода CORS
                 
-                const response = await fetch(proxyUrl, {
+                // Способ 1: Прямой запрос с mode: 'no-cors' (не даст прочитать ответ)
+                // Способ 2: Используем JSONP (не подходит для POST)
+                // Способ 3: Используем скрытый iframe (сложно)
+                
+                // Пока пробуем прямой запрос с надеждой что CORS настроен на сервере
+                const response = await fetch(CONFIG.proxyUrl, {
                     method: 'POST',
+                    mode: 'cors', // Пробуем с CORS
                     headers: { 
                         'Content-Type': 'application/json'
                     },
@@ -458,6 +463,27 @@
             } catch (error) {
                 showError('Ошибка: ' + error.message);
                 debugLog('❌ Детали:', error);
+                
+                // Если не сработало, пробуем ещё один способ
+                debugLog('🔄 Пробуем альтернативный прокси...');
+                
+                try {
+                    const altResponse = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(CONFIG.proxyUrl), {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            code: code,
+                            code_verifier: codeVerifier
+                        })
+                    });
+                    
+                    const altText = await altResponse.text();
+                    debugLog('📥 Альтернативный ответ:', altText.substring(0, 100));
+                    
+                } catch (altError) {
+                    debugLog('❌ Альтернативный прокси тоже не сработал');
+                }
+                
             } finally {
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('authBtn').disabled = false;
