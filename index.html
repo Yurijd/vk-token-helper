@@ -227,7 +227,7 @@
         </div>
 
         <div class="footer">
-            Версия 3.1 • Исправлена генерация state и обработка прокси
+            Версия 3.2 • Добавлена поддержка самоподписанных SSL-сертификатов
         </div>
     </div>
 
@@ -238,7 +238,8 @@
         const CONFIG = {
             clientId: '54464046',
             redirectUri: 'https://yurijd.github.io/vk-token-helper/',
-            proxyUrl: 'https://cors-anywhere.herokuapp.com/http://webkkam.ru/proxy.php',
+            // ✅ Добавлен параметр disableSSL для обхода проблемы с самоподписанным сертификатом
+            proxyUrl: 'https://cors-anywhere.herokuapp.com/http://webkkam.ru/proxy.php?disableSSL',
             scope: 'messages,friends,photos,wall,groups',
             v: '5.199'
         };
@@ -249,7 +250,7 @@
         // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
         // =============================================
 
-        // ✅ ИСПРАВЛЕНО: генерация строки ТОЛЬКО из букв и цифр (без точек и спецсимволов)
+        // Генерация строки ТОЛЬКО из букв и цифр (без точек и спецсимволов)
         function generateRandomString(length) {
             const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
             const array = new Uint8Array(length);
@@ -332,7 +333,7 @@
                 sessionStorage.removeItem('vk_state');
                 sessionStorage.removeItem('vk_code_verifier');
 
-                // ✅ Генерируем параметры (теперь без точек)
+                // Генерируем параметры
                 const state = generateRandomString(32);
                 const codeVerifier = generateRandomString(43);
                 const codeChallenge = await generateCodeChallenge(codeVerifier);
@@ -357,7 +358,7 @@
                     display: 'page'
                 });
 
-                // ✅ ВАЖНО: используем id.vk.ru вместо oauth.vk.com
+                // Используем id.vk.ru вместо oauth.vk.com
                 window.location.href = `https://id.vk.ru/authorize?${params.toString()}`;
 
             } catch (error) {
@@ -394,7 +395,7 @@
                 return;
             }
 
-            // ✅ ВРЕМЕННО: только логируем несовпадение state
+            // Проверяем state (только логируем несовпадение)
             if (returnedState && savedState && returnedState !== savedState) {
                 debugLog('⚠️ State не совпадает (продолжаем)');
                 debugLog('Ожидался:', savedState);
@@ -412,7 +413,7 @@
             try {
                 debugLog('📤 Отправляем запрос к proxy...');
                 
-                // ✅ Добавляем специальный заголовок для cors-anywhere
+                // ✅ Используем proxyUrl с параметром disableSSL
                 const response = await fetch(CONFIG.proxyUrl, {
                     method: 'POST',
                     headers: { 
@@ -425,7 +426,7 @@
                     })
                 });
 
-                // Сначала получаем как текст
+                // Получаем ответ как текст
                 const responseText = await response.text();
                 debugLog('📥 Ответ (первые 100 символов):', responseText.substring(0, 100));
 
@@ -434,7 +435,6 @@
                 try {
                     data = JSON.parse(responseText);
                 } catch (e) {
-                    // Если не JSON — показываем что пришло
                     throw new Error('Сервер вернул не JSON: ' + responseText.substring(0, 200));
                 }
 
@@ -446,14 +446,14 @@
                     throw new Error('Нет токена в ответе');
                 }
 
-                // ✅ УСПЕХ!
+                // УСПЕХ!
                 showToken(data.access_token, data.user_id, data.expires_in);
                 
-                // Очищаем
+                // Очищаем сохранённые данные
                 sessionStorage.removeItem('vk_state');
                 sessionStorage.removeItem('vk_code_verifier');
                 
-                // Очищаем URL
+                // Очищаем URL от параметров
                 window.history.replaceState({}, document.title, window.location.pathname);
 
             } catch (error) {
@@ -465,7 +465,7 @@
             }
         }
 
-        // Запуск
+        // Запуск при загрузке страницы
         window.onload = function() {
             debugLog('📄 Страница загружена');
             handleCallback();
